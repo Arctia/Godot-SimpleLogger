@@ -13,27 +13,41 @@ enum LogLevel {
 @export var current_log_level:LogLevel = LogLevel.DEBUG
 @export var enable_timestamp:bool = true
 @export var save_log:bool = false
+@export var separator:String = " "
 @export var folder:String = ""
 @export var log_filename:String = "addons/Logs/data.log"
+
 
 const TIMESTAMP_FORMAT:String = "%H:%M:%S"
 const LOG_FORMAT_TIMESTAMP:String = "[%s]|[%-6s]: %s"
 const LOG_FORMAT:String = "[%-6s]: %s"
 
+
 var log_file_path = folder + log_filename
+
+
+var _tmp_separator:String = ""
 
 
 #region Logger main stuff
 
+## Set a separator, if once is set to true the separator it
+## will be used only one time then going back to previous
+func set_separator(sep: String, once:bool=false) -> void:
+	if once: self._tmp_separator = self.separator
+	self.separator = sep
+
+
 func _print(level: LogLevel, ...args: Array) -> void:
 	if level < current_log_level: return
-	
+
 	var level_str:String = LogLevel.keys()[level]
 	var timestamp := Time.get_time_string_from_system()
 	var text: String = ""
-	for arg:Variant in args: 
-		for arg2 in arg:
-			text += str(arg2)
+	for i:int in args.size():
+		text += str(args[i])
+		if i < args.size() - 1:
+			text += self.separator
 
 	var message:String = LOG_FORMAT_TIMESTAMP % [
 		timestamp,
@@ -50,6 +64,9 @@ func _print(level: LogLevel, ...args: Array) -> void:
 		_: print(message)
 
 	if self.save_log: self._save_logs_to_file(message)
+	if self._tmp_separator != "":
+		self.separator = self._tmp_separator
+		self._tmp_separator = ""
 
 
 func _save_logs_to_file(message: String) -> bool:
@@ -71,19 +88,19 @@ func _save_logs_to_file(message: String) -> bool:
 #region level functions
 
 func trace(...args: Array) -> void:
-	_print(LogLevel.TRACE, args)
+	callv("_print", [LogLevel.TRACE] + args)
 
 func debug(...args: Array) -> void:
-	_print(LogLevel.DEBUG, args)
+	callv("_print", [LogLevel.DEBUG] + args)
 
 func info(...args: Array) -> void:
-	_print(LogLevel.INFO, args)
+	callv("_print", [LogLevel.INFO] + args)
 
 func warning(...args: Array) -> void:
-	_print(LogLevel.WARN, args)
+	callv("_print", [LogLevel.WARN] + args)
 
 func error(...args: Array) -> void:
-	_print(LogLevel.ERROR, args)
+	callv("_print", [LogLevel.ERROR] + args)
 
 #endregion
 
@@ -91,18 +108,18 @@ func error(...args: Array) -> void:
 #region abbreviated functions
 
 func t(...args: Array) -> void:
-	_print(LogLevel.TRACE, args)
+	callv("_print", [LogLevel.TRACE] + args)
 
 func d(...args: Array) -> void:
-	_print(LogLevel.DEBUG, args)
+	callv("_print", [LogLevel.DEBUG] + args)
 
 func i(...args: Array) -> void:
-	_print(LogLevel.INFO, args)
+	callv("_print", [LogLevel.INFO] + args)
 
 func w(...args: Array) -> void:
-	_print(LogLevel.WARN, args)
+	callv("_print", [LogLevel.WARN] + args)
 
 func e(...args: Array) -> void:
-	_print(LogLevel.ERROR, args)
+	callv("_print", [LogLevel.ERROR] + args)
 
 #endregion
