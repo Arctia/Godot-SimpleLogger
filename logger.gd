@@ -44,9 +44,9 @@ func _print(level: LogLevel, ...args: Array) -> void:
 	var level_str:String = LogLevel.keys()[level]
 	var timestamp := Time.get_time_string_from_system()
 	var text: String = ""
-	for i:int in args.size():
-		text += str(args[i])
-		if i < args.size() - 1:
+	for c:int in args.size():
+		text += str(args[c])
+		if c < args.size() - 1:
 			text += self.separator
 
 	var message:String = LOG_FORMAT_TIMESTAMP % [
